@@ -4,6 +4,24 @@
 
 **SELinux Policy Auditor** is a high-precision security analysis tool designed to identify overly permissive SELinux policies. It works by monitoring **granted** access decisions at the kernel level using eBPF, allowing you to see exactly which permissions an application actually uses versus what its policy allows.
 
+## Who Is This For?
+
+### Linux System Administrators
+
+As an administrator, you can inspect an application's `.te` and `.fc` files to see what permissions it has granted itself—but there's no easy way to know if the application actually *needs* all those permissions.
+
+**The risk:** Overly permissive policies are security holes. If an attacker compromises a process, they inherit all of its SELinux permissions. An application that grants itself `write`, `create`, and `unlink` permissions—but never uses them—gives attackers unnecessary capabilities.
+
+**How this tool helps:** Run SELinux Policy Auditor against any application to see exactly which permissions it uses in practice. You can then work with vendors or your security team to tighten policies and reduce your attack surface.
+
+### Linux Application Developers
+
+When you modify your application, its permission requirements may change. Manually auditing your SELinux policy after every code change is tedious and error-prone.
+
+**The challenge:** After refactoring, you might no longer need `write` access to a directory, or `execute` permission on a file—but your policy still grants them.
+
+**How this tool helps:** Run your updated application through SELinux Policy Auditor to see which permissions are still needed. Remove the ones that aren't, keeping your policy minimal and secure without guesswork.
+
 ## Prerequisites
 
 Before running the audit, ensure your system meets the following requirements:
