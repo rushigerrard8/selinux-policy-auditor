@@ -1,0 +1,93 @@
+module my_app 1.0.0;
+
+require {
+    role system_r;
+    role unconfined_r;
+
+    type unconfined_t;
+    type var_log_t;
+    type bin_t;
+    type lib_t;
+    type locale_t;
+    type proc_t;
+    type sysfs_t;
+
+    class process { transition fork };
+    class file { entrypoint execute execute_no_trans getattr setattr open read write map create append unlink rename
+ioctl lock };
+    class dir { read search getattr open write add_name remove_name };
+    class capability { dac_override dac_read_search };
+}
+
+############################################
+# Type declarations
+############################################
+type my_app_t;
+type my_app_exec_t;
+
+############################################
+# Role associations
+############################################
+role unconfined_r types my_app_t;
+role system_r types my_app_t;
+
+############################################
+# Domain transition rules
+# When unconfined_t executes my_app_exec_t, transition to my_app_t
+############################################
+allow unconfined_t my_app_exec_t:file { execute read open getattr };
+allow unconfined_t my_app_t:process transition;
+allow my_app_t my_app_exec_t:file { entrypoint read execute open getattr };
+type_transition unconfined_t my_app_exec_t:process my_app_t;
+
+############################################
+# OVERLY PERMISSIVE RULES
+# The application only READS from /var/log
+# But we're granting write, append, create, and delete permissions!
+############################################
+
+# Directory permissions - MORE THAN NEEDED
+allow my_app_t var_log_t:dir {
+    read            # NEEDED - to list directory
+    search          # NEEDED - to access directory
+    getattr         # NEEDED - to get directory attributes
+    open            # NEEDED - to open directory
+    write           # EXCESSIVE - app never writes to directory
+    add_name        # EXCESSIVE - app never creates files
+    remove_name     # EXCESSIVE - app never deletes files
+};
+
+# File permissions - MORE THAN NEEDED
+allow my_app_t var_log_t:file {
+    read            # NEEDED - to read log files
+    open            # NEEDED - to open files
+    getattr         # NEEDED - to stat files
+    write           # EXCESSIVE - app never writes to files
+    append          # EXCESSIVE - app never appends to files
+    create          # EXCESSIVE - app never creates files
+    unlink          # EXCESSIVE - app never deletes files
+};
+
+############################################
+# Standard permissions
+############################################
+
+# Basic capabilities
+allow my_app_t self:capability { dac_override dac_read_search };
+allow my_app_t self:process { fork };
+
+# Allow reading libraries
+allow my_app_t lib_t:file { read open execute getattr map };
+allow my_app_t lib_t:dir { read search getattr open };
+
+# Allow reading locale data
+allow my_app_t locale_t:file { read open getattr };
+allow my_app_t locale_t:dir { read search getattr open };
+
+# Allow reading /proc
+allow my_app_t proc_t:file { read open getattr };
+allow my_app_t proc_t:dir { read search getattr open };
+
+# Allow reading sysfs
+allow my_app_t sysfs_t:file { read open getattr };
+allow my_app_t sysfs_t:dir { read search getattr open };

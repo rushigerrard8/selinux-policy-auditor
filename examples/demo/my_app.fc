@@ -1,0 +1,1 @@
+/usr/local/bin/my_app system_u:object_r:my_app_exec_t:s0
