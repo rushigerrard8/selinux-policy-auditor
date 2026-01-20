@@ -44,7 +44,7 @@ def extract_policy_rules(context):
 def parse_rule(line):
     """Parse a single allow rule line"""
     # Example: allow httpd_t httpd_log_t:file { read write };
-    match = re.match(r'allow\s+(\S+)\s+(\S+):(\S+)\s*\(\s*([^)]+)\s*\}', line)
+    match = re.match(r'allow\s+(\S+)\s+(\S+):(\S+)\s+\{\s*([^}]+)\s*\}', line)
     if match:
         source, target, obj_class, perms = match.groups()
         permissions = [p.strip() for p in perms.split()]
