@@ -15,7 +15,7 @@
 
 ## Why SELinux Policy Auditor?
 
-SELinux policies often grant more permissions than applications actually need. **SELinux Policy Auditor** uses eBPF to monitor which permissions are actually used at runtime—so you can safely remove the rest.
+SELinux policies are often misconfigured or get stale over time. Often applications are granted more permissions than they need. **SELinux Policy Auditor** uses eBPF to monitor which permissions are actually used at runtime—so you can safely remove the rest.
 
 ```
 Before:  allow my_app_t var_log_t:file { read write append create unlink open };
@@ -24,6 +24,7 @@ After:   allow my_app_t var_log_t:file { read open };   # 4 excessive permission
 
 ## Features
 
+- **First-of-its-Kind Approach** — Uses eBPF for real-time kernel instrumentation, hooking into the LSM layer to observe the kernel's Access Vector Cache (AVC) and capture permission usage that traditional audit logs often miss
 - **Runtime Analysis** — Monitors actual permission usage via eBPF kernel probes
 - **Zero Policy Changes** — Works without modifying `auditallow` or existing policy
 - **Granular Reporting** — Shows exactly which permissions are used vs. unused
